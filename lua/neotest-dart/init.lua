@@ -157,7 +157,6 @@ function adapter.build_spec(args)
   end
 
   local position = tree:data()
-  local unscape_position_path = unscape_path(position.path)
 
   local command_parts = {}
 
@@ -166,7 +165,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        unscape_position_path,
+        position.path,
         '--reporter',
         'json',
       }
@@ -174,7 +173,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        string.format('%s/%s', unscape_position_path, 'test'),
+        string.format('%s/%s', position.path, 'test'),
         '--reporter',
         'json',
       }
@@ -187,7 +186,7 @@ function adapter.build_spec(args)
     command_parts = {
       command,
       'test',
-      unscape_position_path,
+      position.path,
       test_argument,
       '--reporter',
       'json',
@@ -200,14 +199,14 @@ function adapter.build_spec(args)
   end
   vim.list_extend(command_parts, extra_args)
 
-  local strategy_config = get_strategy_config(args.strategy, unscape_position_path, test_argument)
+  local strategy_config = get_strategy_config(args.strategy, position.path, test_argument)
   local full_command = table.concat(vim.tbl_flatten(command_parts), ' ')
 
   return {
     command = full_command,
     context = {
       results_path = results_path,
-      file = unscape_position_path,
+      file = position.path,
     },
     strategy = strategy_config,
     stream = function(data)
