@@ -129,6 +129,22 @@ local function get_strategy_config(strategy, path, script_args)
   end
 end
 
+-- Utility function untuk unscape path
+local function unscape_path(path)
+  if not path then
+    return nil
+  end
+  
+  -- Handle berbagai jenis escape characters
+  local unescaped = path:gsub("\\ ", " ")  -- Unscape spasi
+                        :gsub("\\", "/")    -- Normalize path separators
+                        :gsub("//", "/")    -- Remove double slashes
+                        :gsub("\"", "")     -- Remove quotes if any
+                        :gsub("'", "")      -- Remove single quotes if any
+  
+  return unescaped
+end
+
 ---@async
 ---@param args neotest.RunArgs
 ---@return neotest.RunSpec
@@ -141,6 +157,7 @@ function adapter.build_spec(args)
   end
 
   local position = tree:data()
+  local unscape_position_path = unscape_path(position.path)
 
   local command_parts = {}
 
@@ -149,7 +166,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        position.path,
+        unscape_position_path,
         '--reporter',
         'json',
       }
@@ -157,7 +174,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        string.format('%s/%s', position.path, 'test'),
+        string.format('%s/%s', unscape_position_path, 'test'),
         '--reporter',
         'json',
       }
@@ -170,7 +187,7 @@ function adapter.build_spec(args)
     command_parts = {
       command,
       'test',
-      position.path,
+      unscape_position_path,
       test_argument,
       '--reporter',
       'json',
