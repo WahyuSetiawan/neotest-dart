@@ -209,8 +209,6 @@ function adapter.build_spec(args)
     ' '
   )
 
-  print(full_command)
-
   return {
     command = full_command,
     context = {
