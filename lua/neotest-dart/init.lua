@@ -129,21 +129,11 @@ local function get_strategy_config(strategy, path, script_args)
   end
 end
 
--- Utility function untuk unscape path
-local function unscape_path(path)
+local function escape_path(path)
   if not path then
     return nil
   end
-
-  -- Handle berbagai jenis escape characters
-  local unescaped = path
-    :gsub('\\ ', ' ') -- Unscape spasi
-    :gsub('\\', '/') -- Normalize path separators
-    :gsub('//', '/') -- Remove double slashes
-    :gsub('"', '') -- Remove quotes if any
-    :gsub("'", '') -- Remove single quotes if any
-
-  return unescaped
+  return path:gsub(' ', '\\ ') -- Escape spasi dengan backslash
 end
 
 ---@async
@@ -166,7 +156,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        position.path,
+        escape_path(position.path),
         '--reporter',
         'json',
       }
@@ -174,7 +164,7 @@ function adapter.build_spec(args)
       command_parts = {
         command,
         'test',
-        string.format('%s/%s', position.path, 'test'),
+        escape_path(string.format('%s/%s', position.path, 'test')),
         '--reporter',
         'json',
       }
@@ -187,7 +177,7 @@ function adapter.build_spec(args)
     command_parts = {
       command,
       'test',
-      position.path,
+      escape_path(position.path),
       test_argument,
       '--reporter',
       'json',
@@ -204,7 +194,7 @@ function adapter.build_spec(args)
   -- local full_command = table.concat(vim.tbl_flatten(command_parts), ' ')
   local full_command = table.concat(
     vim.tbl_map(function(part)
-      return tostring(part):gsub(' ', '\\ ') -- Escape spasi di semua bagian command
+      return tostring(part)
     end, vim.tbl_flatten(command_parts)),
     ' '
   )
