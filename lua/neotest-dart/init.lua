@@ -201,10 +201,11 @@ function adapter.build_spec(args)
   vim.list_extend(command_parts, extra_args)
 
   local strategy_config = get_strategy_config(args.strategy, position.path, test_argument)
+  -- local full_command = table.concat(vim.tbl_flatten(command_parts), ' ')
   local full_command = table.concat(
-    vim.tbl_flatten(function(part)
-      return tostring(part):gsub(' ', '\\ ')
-    end),
+    vim.tbl_map(function(part)
+      return tostring(part):gsub(' ', '\\ ') -- Escape spasi di semua bagian command
+    end, vim.tbl_flatten(command_parts)),
     ' '
   )
 
