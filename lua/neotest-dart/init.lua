@@ -134,14 +134,15 @@ local function unscape_path(path)
   if not path then
     return nil
   end
-  
+
   -- Handle berbagai jenis escape characters
-  local unescaped = path:gsub("\\ ", " ")  -- Unscape spasi
-                        :gsub("\\", "/")    -- Normalize path separators
-                        :gsub("//", "/")    -- Remove double slashes
-                        :gsub("\"", "")     -- Remove quotes if any
-                        :gsub("'", "")      -- Remove single quotes if any
-  
+  local unescaped = path
+    :gsub('\\ ', ' ') -- Unscape spasi
+    :gsub('\\', '/') -- Normalize path separators
+    :gsub('//', '/') -- Remove double slashes
+    :gsub('"', '') -- Remove quotes if any
+    :gsub("'", '') -- Remove single quotes if any
+
   return unescaped
 end
 
@@ -200,7 +201,14 @@ function adapter.build_spec(args)
   vim.list_extend(command_parts, extra_args)
 
   local strategy_config = get_strategy_config(args.strategy, position.path, test_argument)
-  local full_command = table.concat(vim.tbl_flatten(command_parts), ' ')
+  local full_command = table.concat(
+    vim.tbl_flatten(function(part)
+      return tostring(part):gsub(' ', '\\ ')
+    end),
+    ' '
+  )
+
+  print(full_command)
 
   return {
     command = full_command,
